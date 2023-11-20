@@ -41,7 +41,7 @@ char* plateau_oie(void) {
         else if (i == 94) plateau[i] = 'X';
 
 
-        else plateau[i] = ', ,';
+        else plateau[i] = ' ';
 
         
     
@@ -83,6 +83,7 @@ void affichePlateauEnSpirale()
         }
         printf("\n");
     }
+    printf("%ld",sizeof(plateau[0]));
 }
 
 
@@ -90,7 +91,7 @@ void affichePlateauEnSpirale()
 
 int main() {
     affichePlateauEnSpirale(); // affiche le plateau en spirale
-    int attente[4]; // Vérifie si le joueur peut jouer (On variera avec scanf)
-    int positions[4]; // même chose qu'avec attente
+    //int attente[4]; // Vérifie si le joueur peut jouer (On variera avec scanf)
+    //int positions[4]; // même chose qu'avec attente
     return 0;
 }
