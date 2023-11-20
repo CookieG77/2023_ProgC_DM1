@@ -1,5 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<time.h>
+#include<MLV/MLV_all.h>
 
 /*projet du jeu de l'oie*/
 
