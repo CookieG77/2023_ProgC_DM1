@@ -23,7 +23,7 @@ char* plateau_oie(void) {
     // Initialiser le tableau de caractères (vous pouvez remplacer cela par une logique spécifique)
     for (int i = 0; i < taille; ++i) {
         
-        if(i % 9 == 0 && i<92) plateau[i] = 'O';
+        if((i % 9 == 0 && i != 0) && i<92) plateau[i] = 'O';
 
         else if (i == 8) plateau[i] = 'R';
 
@@ -84,22 +84,241 @@ void affichePlateauEnSpirale()
 }
 
 
-int avancerJoueur(char plateau[],
-                  int positions[],
-                  int attente[],
-                  int joueur_courant,
-                  int nb_joueurs,
-                  int des[2],
-                  bool premier_tour) {
-    int new_pos[2] = {positions[0], positions[1]};
+void collisions(char* plateau,
+                int* positions,
+                int* attente,
+                int nb_joueurs,
+                int joueur_courant,
+                int nouvelle_pos)
 
-    return 0;
+{
+    int pos_ancien = positions[joueur_courant];
+    if (nouvelle_pos == 53 || nouvelle_pos == 74)
+    {
+        positions[joueur_courant] = nouvelle_pos;
+
+    } else {
+        for (int i = 0; i < nb_joueurs; i++)
+        {
+            if (nouvelle_pos == positions[i] && i != joueur_courant) {
+                positions[i] = pos_ancien;
+                positions[joueur_courant] = nouvelle_pos;
+                int des_nuls[2];
+
+                int cpt = 0;
+                switch (plateau[nouvelle_pos])
+                {
+                case 'T':
+                    cpt = 0;
+                    for (int i = 0; i < nb_joueurs; i++) {
+                        if (attente[i] = -1 && positions[i] == 53 && i!= joueur_courant) cpt++;
+                    }
+                    if (cpt % 2 != 0)
+                    {
+                        attente[nouvelle_pos] = -1;
+
+                    } else {
+                        for (int i = 0; i < nb_joueurs; i++){
+                            if (positions[i] == 53) attente[i] = 0;
+                        }
+                        
+                    }
+                    break;
+
+                case 'P':
+                    cpt = 0;
+                    for (int i = 0; i < nb_joueurs; i++) {
+                        if (attente[i] = -1 && positions[i] == 74 && i!= joueur_courant) cpt++;
+                    }
+                    if (cpt % 2 != 0)
+                    {
+                        attente[nouvelle_pos] = -1;
+
+                    } else {
+                        for (int i = 0; i < nb_joueurs; i++){
+                            if (positions[i] == 74) attente[i] = 0;
+                        }
+                        
+                    }
+                    
+                    break;
+
+                case 'H':
+                    attente[nouvelle_pos] = 2;
+                    break;
+                
+                default:
+                    break;
+                }
+                break;
+            }
+        }
+        if(positions[joueur_courant] == pos_ancien) {
+            positions[joueur_courant] = nouvelle_pos;
+            printf("--> %d\n",joueur_courant);}
+    }
 }
 
-int playgame(int *attente[], int *position[], char plateau) {
 
 
-    return -1; //retourne -1 en cas d'arrêt de partie
+
+
+
+
+
+
+
+
+int avancer_joueur(char *plateau,
+                   int *positions,
+                   int *attente,
+                   const int joueur_courant,
+                   const int nb_joueurs,
+                   int des[2],
+                   const bool premier_tour)
+{
+    int pos_jcourant = positions[joueur_courant]+des[0]+des[1];
+    if (premier_tour) {
+        if ((des[0] == 6 && des[1]== 3) ||(des[0] == 3 && des[1]== 6)) {
+            pos_jcourant = 40;
+            //Premier lancer direction case 40
+        } else if ((des[0] == 4 && des[1]== 5) ||(des[0] == 5 && des[1]== 4)) {
+            pos_jcourant = 89;
+            //Premier lancer direction case 89
+        }
+    
+
+    } 
+    int cpt = 0;
+    switch (plateau[pos_jcourant])
+    {
+    case 'O':
+        pos_jcourant+des[0]+des[1];
+        break;
+
+    case 'T':
+        cpt = 0;
+        for (int i = 0; i < nb_joueurs; i++) {
+            if (attente[i] = -1 && positions[i] == 53 && i!= joueur_courant) cpt++;
+        }
+        if (cpt % 2 != 0)
+        {
+            attente[pos_jcourant] = -1;
+
+        } else {
+            for (int i = 0; i < nb_joueurs; i++){
+                if (positions[i] == 53) attente[i] = 0;
+            }
+            
+        }
+        break;
+
+    case 'R':
+        pos_jcourant = 16;
+        break;
+
+    case 'P':
+        cpt = 0;
+        for (int i = 0; i < nb_joueurs; i++) {
+            if (attente[i] = -1 && positions[i] == 74 && i!= joueur_courant) cpt++;
+        }
+        if (cpt % 2 != 0)
+        {
+            attente[pos_jcourant] = -1;
+
+        } else {
+            for (int i = 0; i < nb_joueurs; i++) {
+                if (positions[i] == 74) attente[i] = 0;
+            }
+        }
+        
+        break;
+
+    case 'H':
+        attente[pos_jcourant] = 2;
+        break;
+
+    case 'L':
+        pos_jcourant = 52;
+        break;
+
+    case 'X':
+        pos_jcourant = 0;
+        break;
+    
+    default:
+        break;
+    }
+    collisions(plateau, positions, attente, nb_joueurs, joueur_courant, pos_jcourant);
+    if (pos_jcourant == 99) return joueur_courant;
+    return -1;
+      
+}
+
+
+void afficherPlateau(const char *plateau,const int *positions,const int nb_joueurs)
+{
+printf("Affichage du tableau avec représentation des cases \n");
+printf("<");
+for (int i = 0; i < nb_joueurs; i++) {
+    for (int j = 0;j<100; j++) {
+        if (j == positions[i]) {
+        printf("Joueur %d: case %d:(%c) ",i+1,positions[i],plateau[j]);
+        }
+    }
+}
+ printf(">\n");
+}
+
+bool desValides(int * des) {
+    char rep[1];
+    int a, b;
+    scanf("%s",rep);
+    if((int)rep[0] ==  'q') return false;
+    scanf("%d", &b);
+    a = (int)rep[0] - '0';
+    while((a > 0 || b > 0 || a < 7 || b < 7) && !(int)rep[0] == 'q') {
+        printf("Valeurs de dés invalides !\n");
+        scanf("%s", rep);
+        scanf("%d", &b);
+        printf(">>>%s<<<", rep);
+        a = (int)rep[0] - '0';
+    }
+    if((int)rep[0] == 'q') return false;
+    des[0] = a, des[1] = b;
+    printf("[%d, %d]\n", des[0], des[1]);
+    return true;
+}
+
+
+int playgame(int *attente,
+             int *position,
+             char* plateau,
+             const int nb_joueurs,
+             const int tours) {
+    int i = tours;
+    int des_joueur[2];
+    bool continuer = true;
+    int statut = -1;
+    while(statut == -1){
+        printf("Joueur %d : ",i%nb_joueurs+1);
+        des_joueur[0] = 0, des_joueur[1] = 1;
+        continuer = desValides(des_joueur);
+        if(!continuer) {
+            printf("Arrêt, partie pas sauvegardée dans nulpart\n");
+            //METTRE SAUVEGARDE ICI
+            return -1; //retourne -1 en cas d'arrêt de partie
+        }
+        printf("id_joueur : %d\n", i%nb_joueurs);
+        if (i < nb_joueurs) {
+            statut = avancer_joueur(plateau, position, attente, i%nb_joueurs, nb_joueurs, des_joueur, true);
+        } else {
+            statut = avancer_joueur(plateau, position, attente, i%nb_joueurs, nb_joueurs, des_joueur, false);
+        }
+        i++;
+        afficherPlateau(plateau, position, nb_joueurs);
+    }
+    return i; //retourne l'index du gagnant
 }
 
 
@@ -116,11 +335,14 @@ int main(int argc, char * argv[]) {
         char line[4];
         int num_line = 0;
         int nb_joueurs;
+        int attente[4]; // Vérifie si le joueur peut jouer (On variera avec scanf)
+        int positions[4]; // même chose qu'avec attente
+        int i;
+        int statut = -1;
         for(; fgets(line, 4, save_file);) {
             line[strcspn(line, "\n")] = 0;
-            printf("%s --- %d\n",line, num_line);
             if(num_line == 0 && !(line[0] == 'J' && line[1] == 'O')) {
-                printf("Erreur : fichier de sauvegarde corompu !\n");
+                printf("Erreur : fichier de sauvegarde corrompu !\n");
                 return 2;
             }
             
@@ -129,11 +351,31 @@ int main(int argc, char * argv[]) {
                 if(num_line == 1){
                 //Recupération ud nombre de joueurs
                 if((int)line[0] - '0' < 2 || (int)line[0] - '0' > 4) {
-                    printf("Erreur : fichier de sauvegarde corompu !\n");
+                    printf("Erreur : fichier de sauvegarde corrompu !\n");
                     return 2;
                 }
                 nb_joueurs = (int)line[0] - '0';
+                i = 0;
+                
             }
+                if(num_line > 1){
+                    int des[2] = {(int)line[0] - '0', (int)line[2] - '0'};
+                    if(des[0] > 6 || des[0] < 1 || des[1] > 6 || des[1] < 1) {
+                        printf("Erreur : fichier de sauvegarde corrompu !\n");
+                        return 2;
+                    }
+                    if (attente[i%nb_joueurs] > 0) {
+                        attente[i%nb_joueurs]--;
+                    } else {
+                        if (i<nb_joueurs-1){
+                            statut = avancer_joueur(plateau, positions, attente, i%nb_joueurs, nb_joueurs, des, true);
+                        } else {
+                            statut = avancer_joueur(plateau, positions, attente, i%nb_joueurs, nb_joueurs, des, false);
+                        }
+                        if(statut != -1) break;
+                    }
+                    i++;
+                }
                 num_line++;
             }
         }
@@ -143,9 +385,10 @@ int main(int argc, char * argv[]) {
         //On recréer la partie par rapport à la sauvegarde
         int nb_tours = num_line - 2;
         char *status_partie = "non ";
-        int attente[nb_joueurs]; // Vérifie si le joueur peut jouer (On variera avec scanf)
-        int positions[nb_joueurs]; // même chose qu'avec attente
+        if (statut != -1) status_partie = " ";
         printf("Chargement de partie : %d joueurs, %d tours simulés, partie %sterminée\n", nb_joueurs, nb_tours, status_partie);
+        afficherPlateau(plateau, positions, nb_joueurs);
+        if(statut == -1) playgame(attente, positions, plateau, nb_joueurs, i);
     } else {
         //On créer une nouvelle partie à partir de rien
         int nb_tours = 0;
@@ -158,7 +401,7 @@ int main(int argc, char * argv[]) {
         }
         int attente[nb_joueurs]; // Vérifie si le joueur peut jouer (On variera avec scanf)
         int positions[nb_joueurs]; // même chose qu'avec attente
+        playgame(attente, positions, plateau, nb_joueurs, 0);
     }
-    //affichePlateauEnSpirale(); // affiche le plateau en spirale
     return 0;
 }
