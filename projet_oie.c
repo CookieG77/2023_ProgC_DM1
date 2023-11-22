@@ -7,11 +7,6 @@
 
 
 
-
-
-#include <stdio.h>
-#include <stdlib.h>
-
 char* plateau_oie(void) {
     int taille = 100;
     // Allouer de la mémoire pour le tableau de caractères
@@ -61,7 +56,7 @@ char* plateau_oie(void) {
 void affichePlateauEnSpirale()
 {
     int plateau[][10] = {
-        {0,1,2,3,4,5,6,7,8,9},
+        {0  ,1, 2, 3, 4, 5, 6, 7, 8, 9},
         {35,36,37,38,39,40,41,42,43,10},
         {34,63,64,65,66,67,68,69,44,11},
         {33,62,83,84,85,86,87,70,45,12},
