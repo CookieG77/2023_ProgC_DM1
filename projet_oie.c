@@ -1,5 +1,7 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
 
 /*projet du jeu de l'oie*/
 
@@ -82,11 +84,81 @@ void affichePlateauEnSpirale()
 }
 
 
+int avancerJoueur(char plateau[],
+                  int positions[],
+                  int attente[],
+                  int joueur_courant,
+                  int nb_joueurs,
+                  int des[2],
+                  bool premier_tour) {
+    int new_pos[2] = {positions[0], positions[1]};
+
+    return 0;
+}
+
+int playgame(int *attente[], int *position[], char plateau) {
 
 
-int main() {
-    affichePlateauEnSpirale(); // affiche le plateau en spirale
-    //int attente[4]; // Vérifie si le joueur peut jouer (On variera avec scanf)
-    //int positions[4]; // même chose qu'avec attente
+    return -1; //retourne -1 en cas d'arrêt de partie
+}
+
+
+int main(int argc, char * argv[]) {
+    char *plateau = plateau_oie();
+    if(argc > 1){
+        FILE *save_file = fopen(argv[1], "r");
+        if(save_file == NULL) {
+            //Si le fichier est introuvable, save est NULL donc on fait une erreur.
+            printf("Erreur: fichier introuvable !\n");
+            return 1;
+        }
+        //Recupération du contenu de la sauvegarde
+        char line[4];
+        int num_line = 0;
+        int nb_joueurs;
+        for(; fgets(line, 4, save_file);) {
+            line[strcspn(line, "\n")] = 0;
+            printf("%s --- %d\n",line, num_line);
+            if(num_line == 0 && !(line[0] == 'J' && line[1] == 'O')) {
+                printf("Erreur : fichier de sauvegarde corompu !\n");
+                return 2;
+            }
+            
+            if(strlen(line) != 0 && line[0] != ' ') {
+                //Condition pour ignorer les lignes vides / retour à la lignes / etc...
+                if(num_line == 1){
+                //Recupération ud nombre de joueurs
+                if((int)line[0] - '0' < 2 || (int)line[0] - '0' > 4) {
+                    printf("Erreur : fichier de sauvegarde corompu !\n");
+                    return 2;
+                }
+                nb_joueurs = (int)line[0] - '0';
+            }
+                num_line++;
+            }
+        }
+        fclose(save_file);//On ferme le fichier de sauvegarde.
+
+
+        //On recréer la partie par rapport à la sauvegarde
+        int nb_tours = num_line - 2;
+        char *status_partie = "non ";
+        int attente[nb_joueurs]; // Vérifie si le joueur peut jouer (On variera avec scanf)
+        int positions[nb_joueurs]; // même chose qu'avec attente
+        printf("Chargement de partie : %d joueurs, %d tours simulés, partie %sterminée\n", nb_joueurs, nb_tours, status_partie);
+    } else {
+        //On créer une nouvelle partie à partir de rien
+        int nb_tours = 0;
+        int nb_joueurs;
+        char *status_partie = "non ";
+            printf("Combien de joueur ? ");
+        for(;nb_joueurs < 2 || nb_joueurs > 4;){
+            scanf("%d", &nb_joueurs);
+            printf("Valeur invalide, le total de joueur doit être entre 2 et 4 compris.\nCombien de joueur ? ");
+        }
+        int attente[nb_joueurs]; // Vérifie si le joueur peut jouer (On variera avec scanf)
+        int positions[nb_joueurs]; // même chose qu'avec attente
+    }
+    //affichePlateauEnSpirale(); // affiche le plateau en spirale
     return 0;
 }
