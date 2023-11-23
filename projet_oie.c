@@ -41,11 +41,6 @@ char* plateau_oie(void) {
 }
 
 
-
-
-
-
-
 // affichage du plateau en spirale
 void affichePlateauEnSpirale()
 {
@@ -74,6 +69,39 @@ void affichePlateauEnSpirale()
     }
     printf("%ld",sizeof(plateau[0]));
 }
+
+
+void createSave(const int nbr_tour, const int * tableau, const int nb_joueurs) {
+    char filename[48];
+    char answer;
+    do {
+    printf("\033[1;35mVoulez vous sauvegardez votre partie ? (y/n) ");
+    scanf("%c", &answer);
+    printf("\033[0m");
+    } while ( answer != 'y' && answer != 'Y' && answer != 'n' && answer !='N' );
+    if (answer == 'y') {
+        do {
+            printf("Quel nom voulez-vous donner à la sauvegarde \033[1;31m(48 caractères maximum !)\033[0m: ");
+        } while (scanf("%s", filename) >= 48);
+        FILE *fp = fopen(strcat(filename, ".jo"), "w");
+        char line[5];
+        sprintf(line, "JO\n");
+        fprintf(fp, line, 0);
+        sprintf(line, "%d\n", nb_joueurs);
+        fprintf(fp, line, 1);
+        for(int i = 0; i<nbr_tour; i++ ) {
+            
+            if(i != nbr_tour-1)
+                sprintf(line, "%d %d\n", tableau[i*2], tableau[i*2+1]);
+            else
+                sprintf(line, "%d %d", tableau[i*2], tableau[i*2+1]);
+            fprintf(fp, line, i+2);
+        }
+        fclose(fp);//fermeture sauvegarde
+        printf("Sauvegardé au nom \033[1;30m%s\033[0m.\n",filename);
+    }
+}
+
 
 
 void collisions(char* plateau,
@@ -143,14 +171,6 @@ void collisions(char* plateau,
 
 
 
-
-
-
-
-
-
-
-
 int avancer_joueur(char *plateau,
                    int *positions,
                    int *attente,
@@ -185,8 +205,7 @@ int avancer_joueur(char *plateau,
             }
     //Gestion des autres cases.
     switch (plateau[pos_jcourant]) {
-        case 'T':
-            printf("entrer case trou\n");        
+        case 'T':   
             cpt = 0;
             for (int i = 0; i < nb_joueurs; i++) {
                 if (attente[i] == -1 && positions[i] == 53 && i != joueur_courant) cpt++;
@@ -277,7 +296,8 @@ int playgame(int *attente,
              int *position,
              char* plateau,
              const int nb_joueurs,
-             const int tours) {
+             const int tours,
+             int * table_des) {
     int i = tours;
     int des_joueur[2];
     bool continuer = true;
@@ -288,7 +308,7 @@ int playgame(int *attente,
             des_joueur[0] = 0, des_joueur[1] = 1;
             continuer = desValides(des_joueur);
             if(!continuer) {
-                //METTRE SAUVEGARDE ICI
+                createSave(i, table_des, nb_joueurs);
                 return -1; //retourne -1 en cas d'arrêt de partie
             }
             if (i < nb_joueurs) {
@@ -296,6 +316,8 @@ int playgame(int *attente,
             } else {
                 statut = avancer_joueur(plateau, position, attente, i%nb_joueurs, nb_joueurs, des_joueur, false);
             }
+            if(i%nb_joueurs == 0 && i!=0) table_des = (int *)realloc(table_des, 2*(i+nb_joueurs) * sizeof(int));
+            table_des[i*2] = des_joueur[0], table_des[i*2+1] = des_joueur[1];            
             afficherPlateau(plateau, position, nb_joueurs);
         } else if(attente[i%nb_joueurs] > 0) {
             printf("Joueur %d se repose à l'hotel. (encore %d tour)\n", i%nb_joueurs+1, attente[i%nb_joueurs]);
@@ -325,6 +347,7 @@ int playgame(int *attente,
 int main(int argc, char * argv[]) {
     char *plateau = plateau_oie();
     int res = -1;
+    int * table_des;
     if(argc > 1){
         FILE *save_file = fopen(argv[1], "r");
         if(save_file == NULL) {
@@ -356,6 +379,7 @@ int main(int argc, char * argv[]) {
                     return 2;
                 }
                 nb_joueurs = (int)line[0] - '0';
+                table_des = (int *)malloc(2*nb_joueurs* sizeof(int));
                 i = 0;
                 
             }
@@ -373,9 +397,11 @@ int main(int argc, char * argv[]) {
                         } else {
                             statut = avancer_joueur(plateau, positions, attente, i%nb_joueurs, nb_joueurs, des, false);
                         }
+                        table_des[i*2] = des[0], table_des[i*2+1] = des[1];
                         if(statut != -1) break;
                     }
                     i++;
+                    if(i%nb_joueurs == 0 && i!=0) table_des = (int *)realloc(table_des, 2*nb_joueurs*(i/3)*sizeof(int));
                 }
                 num_line++;
             }
@@ -389,8 +415,7 @@ int main(int argc, char * argv[]) {
         if (statut != -1) status_partie = " ";
         printf("Chargement de partie : %d joueurs, %d tours simulés, partie %sterminée\n", nb_joueurs, nb_tours, status_partie);
         afficherPlateau(plateau, positions, nb_joueurs);
-        printf("%s\n", plateau);
-        if(statut == -1) res = playgame(attente, positions, plateau, nb_joueurs, i);
+        if(statut == -1) res = playgame(attente, positions, plateau, nb_joueurs, i, table_des);
     } else {
         //On créer une nouvelle partie à partir de rien
         int nb_tours = 0;
@@ -404,11 +429,12 @@ int main(int argc, char * argv[]) {
         }
         int attente[4]; // Vérifie si le joueur peut jouer (On variera avec scanf)
         int positions[4]; // même chose qu'avec attente
+        table_des = (int *)malloc(2*nb_joueurs* sizeof(int));
         afficherPlateau(plateau, positions, nb_joueurs);
-        res = playgame(attente, positions, plateau, nb_joueurs, 0);
+        res = playgame(attente, positions, plateau, nb_joueurs, 0, table_des);
     }
     if(res > -1)       printf("\033[1;32mPartie finit :\033[0m Le joueur gagnant est le numéro %d. Bravo !\n", res);
     else if(res == -2) printf("\033[1;31mPartie finit :\033[0m Tout les joueurs sont bloqués.\n");
-    else if(res == -1) printf("\033[1;31mPartie finit :\033[0m Jeu arrêté, partie pas sauvegardé.\n");
+    else if(res == -1) printf("\033[1;31mPartie finit :\033[0m Jeu arrêté.\n");
     return 0;
 }
