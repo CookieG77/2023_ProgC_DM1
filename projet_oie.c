@@ -74,10 +74,12 @@ void affichePlateauEnSpirale()
 void createSave(const int nbr_tour, const int * tableau, const int nb_joueurs) {
     char filename[48];
     char answer;
+    int count = 0;
     do {
-    printf("\033[1;35mVoulez vous sauvegardez votre partie ? (y/n) ");
+    printf("\033[1;35mVoulez vous sauvegardez votre partie ? (y/n)%s ", (count == 0)? "\r" : "");
     scanf("%c", &answer);
     printf("\033[0m");
+    count++;
     } while ( answer != 'y' && answer != 'Y' && answer != 'n' && answer !='N' );
     if (answer == 'y') {
         do {
@@ -340,7 +342,7 @@ int playgame(int *attente,
         }
     }
     if(statut == -2) return -2;
-    return i%nb_joueurs; //retourne l'index du gagnant
+    return nb_joueurs - i%nb_joueurs; //retourne l'index du gagnant
 }
 
 
