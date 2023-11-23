@@ -7,8 +7,6 @@
 
 /* définition du plateau*/
 
-
-
 char* plateau_oie(void) {
     int taille = 100;
     // Allouer de la mémoire pour le tableau de caractères
@@ -37,14 +35,8 @@ char* plateau_oie(void) {
 
         else if (i == 94) plateau[i] = 'X';
 
-
         else plateau[i] = ' ';
-
-        
-    
-       
     }
-
     return plateau;
 }
 
@@ -103,7 +95,6 @@ void collisions(char* plateau,
             if (nouvelle_pos == positions[i] && i != joueur_courant) {
                 positions[i] = pos_ancien;
                 positions[joueur_courant] = nouvelle_pos;
-                int des_nuls[2];
 
                 int cpt = 0;
                 switch (plateau[nouvelle_pos])
@@ -111,40 +102,33 @@ void collisions(char* plateau,
                 case 'T':
                     cpt = 0;
                     for (int i = 0; i < nb_joueurs; i++) {
-                        if (attente[i] = -1 && positions[i] == 53 && i!= joueur_courant) cpt++;
+                        if (attente[i] == -1 && positions[i] == 53 && i!= joueur_courant) cpt++;
                     }
-                    if (cpt % 2 != 0)
-                    {
-                        attente[nouvelle_pos] = -1;
-
+                    if (cpt % 2 == 0 || cpt == 0) {
+                        attente[joueur_courant] = -1;
                     } else {
                         for (int i = 0; i < nb_joueurs; i++){
                             if (positions[i] == 53) attente[i] = 0;
                         }
-                        
                     }
                     break;
 
                 case 'P':
                     cpt = 0;
                     for (int i = 0; i < nb_joueurs; i++) {
-                        if (attente[i] = -1 && positions[i] == 74 && i!= joueur_courant) cpt++;
+                        if (attente[i] == -1 && positions[i] == 74 && i!= joueur_courant) cpt++;
                     }
-                    if (cpt % 2 != 0)
-                    {
-                        attente[nouvelle_pos] = -1;
-
+                    if (cpt % 2 == 0 || cpt == 0) {
+                        attente[joueur_courant] = -1;
                     } else {
                         for (int i = 0; i < nb_joueurs; i++){
                             if (positions[i] == 74) attente[i] = 0;
                         }
-                        
                     }
-                    
                     break;
 
                 case 'H':
-                    attente[nouvelle_pos] = 2;
+                    attente[joueur_courant] = 2;
                     break;
                 
                 default:
@@ -153,9 +137,7 @@ void collisions(char* plateau,
                 break;
             }
         }
-        if(positions[joueur_courant] == pos_ancien) {
-            positions[joueur_courant] = nouvelle_pos;
-            printf("--> %d\n",joueur_courant);}
+        if(positions[joueur_courant] == pos_ancien) positions[joueur_courant] = nouvelle_pos;
     }
 }
 
@@ -176,8 +158,12 @@ int avancer_joueur(char *plateau,
                    const int nb_joueurs,
                    int des[2],
                    const bool premier_tour)
-{
+{   
     int pos_jcourant = positions[joueur_courant]+des[0]+des[1];
+    if(pos_jcourant>99) {
+        pos_jcourant = 99 - (positions[joueur_courant]+des[0]+des[1]-99);
+    }
+
     if (premier_tour) {
         if ((des[0] == 6 && des[1]== 3) ||(des[0] == 3 && des[1]== 6)) {
             pos_jcourant = 40;
@@ -190,64 +176,62 @@ int avancer_joueur(char *plateau,
 
     } 
     int cpt = 0;
-    switch (plateau[pos_jcourant])
-    {
-    case 'O':
-        pos_jcourant+des[0]+des[1];
-        break;
-
-    case 'T':
-        cpt = 0;
-        for (int i = 0; i < nb_joueurs; i++) {
-            if (attente[i] = -1 && positions[i] == 53 && i!= joueur_courant) cpt++;
-        }
-        if (cpt % 2 != 0)
-        {
-            attente[pos_jcourant] = -1;
-
-        } else {
-            for (int i = 0; i < nb_joueurs; i++){
-                if (positions[i] == 53) attente[i] = 0;
+    //Gestion des cases Oies.
+    while(pos_jcourant%9 == 0 && pos_jcourant<=92) {
+                pos_jcourant+=des[0]+des[1];
+                if(pos_jcourant>99) {
+                    pos_jcourant = 99 - (positions[joueur_courant]+des[0]+des[1]-99);
+                }
             }
-            
-        }
-        break;
-
-    case 'R':
-        pos_jcourant = 16;
-        break;
-
-    case 'P':
-        cpt = 0;
-        for (int i = 0; i < nb_joueurs; i++) {
-            if (attente[i] = -1 && positions[i] == 74 && i!= joueur_courant) cpt++;
-        }
-        if (cpt % 2 != 0)
-        {
-            attente[pos_jcourant] = -1;
-
-        } else {
+    //Gestion des autres cases.
+    switch (plateau[pos_jcourant]) {
+        case 'T':
+            printf("entrer case trou\n");        
+            cpt = 0;
             for (int i = 0; i < nb_joueurs; i++) {
-                if (positions[i] == 74) attente[i] = 0;
+                if (attente[i] == -1 && positions[i] == 53 && i != joueur_courant) cpt++;
             }
-        }
+            if (cpt % 2 == 0 || cpt == 0) {
+                attente[joueur_courant] = -1;
+            } else {
+                for (int i = 0; i < nb_joueurs; i++) {
+                    if (positions[i] == 53) attente[i] = 0;
+                }
+            }
+            break;
+
+        case 'R':
+            pos_jcourant = 16;
+            break;
+
+        case 'P':  
+            cpt = 0;
+            for (int i = 0; i < nb_joueurs; i++) {
+                if (attente[i] == -1 && positions[i] == 74 && i != joueur_courant) cpt++;
+            }
+            if (cpt % 2 == 0 || cpt == 0) {
+                attente[joueur_courant] = -1;
+            } else {
+                for (int i = 0; i < nb_joueurs; i++) {
+                    if (positions[i] == 74) attente[i] = 0;
+                }
+            }
+            break;
+
+        case 'H':
+            attente[joueur_courant] = 2;
+            break;
+
+        case 'L':
+            pos_jcourant = 52;
+            break;
+
+        case 'X':
+            pos_jcourant = 0;
+            break;
         
-        break;
-
-    case 'H':
-        attente[pos_jcourant] = 2;
-        break;
-
-    case 'L':
-        pos_jcourant = 52;
-        break;
-
-    case 'X':
-        pos_jcourant = 0;
-        break;
-    
-    default:
-        break;
+        default:
+            break;
     }
     collisions(plateau, positions, attente, nb_joueurs, joueur_courant, pos_jcourant);
     if (pos_jcourant == 99) return joueur_courant;
@@ -256,18 +240,17 @@ int avancer_joueur(char *plateau,
 }
 
 
-void afficherPlateau(const char *plateau,const int *positions,const int nb_joueurs)
-{
-printf("Affichage du tableau avec représentation des cases \n");
-printf("<");
-for (int i = 0; i < nb_joueurs; i++) {
-    for (int j = 0;j<100; j++) {
-        if (j == positions[i]) {
-        printf("Joueur %d: case %d:(%c) ",i+1,positions[i],plateau[j]);
+void afficherPlateau(const char *plateau,const int *positions,const int nb_joueurs) {
+    //printf("\033[0mAffichage du tableau avec représentation des cases \n\033[0;36m<");
+    printf("\033[0;36m<");
+    for (int i = 0; i < nb_joueurs; i++) {
+        for (int j = 0;j<100; j++) {
+            if (j == positions[i]) {
+            printf("Joueur %d: case %d:(%c) ", i+1, positions[i], plateau[j]);
+            }
         }
     }
-}
- printf(">\n");
+    printf(">\033[0m\n");
 }
 
 bool desValides(int * des) {
@@ -277,16 +260,15 @@ bool desValides(int * des) {
     if((int)rep[0] ==  'q') return false;
     scanf("%d", &b);
     a = (int)rep[0] - '0';
-    while((a > 0 || b > 0 || a < 7 || b < 7) && !(int)rep[0] == 'q') {
-        printf("Valeurs de dés invalides !\n");
+    while((a < 1 || a > 6 || b < 1 || b > 6)) {
+        if ((int)rep[0] == 'q') break;
+        printf("\033[1;31mValeurs de dés invalides !\033[0m\n");
         scanf("%s", rep);
         scanf("%d", &b);
-        printf(">>>%s<<<", rep);
         a = (int)rep[0] - '0';
     }
     if((int)rep[0] == 'q') return false;
     des[0] = a, des[1] = b;
-    printf("[%d, %d]\n", des[0], des[1]);
     return true;
 }
 
@@ -301,29 +283,48 @@ int playgame(int *attente,
     bool continuer = true;
     int statut = -1;
     while(statut == -1){
-        printf("Joueur %d : ",i%nb_joueurs+1);
-        des_joueur[0] = 0, des_joueur[1] = 1;
-        continuer = desValides(des_joueur);
-        if(!continuer) {
-            printf("Arrêt, partie pas sauvegardée dans nulpart\n");
-            //METTRE SAUVEGARDE ICI
-            return -1; //retourne -1 en cas d'arrêt de partie
-        }
-        printf("id_joueur : %d\n", i%nb_joueurs);
-        if (i < nb_joueurs) {
-            statut = avancer_joueur(plateau, position, attente, i%nb_joueurs, nb_joueurs, des_joueur, true);
+        if(attente[i%nb_joueurs] == 0) {
+            printf("\033[1;33mJoueur %d : ",i%nb_joueurs+1);
+            des_joueur[0] = 0, des_joueur[1] = 1;
+            continuer = desValides(des_joueur);
+            if(!continuer) {
+                //METTRE SAUVEGARDE ICI
+                return -1; //retourne -1 en cas d'arrêt de partie
+            }
+            if (i < nb_joueurs) {
+                statut = avancer_joueur(plateau, position, attente, i%nb_joueurs, nb_joueurs, des_joueur, true);
+            } else {
+                statut = avancer_joueur(plateau, position, attente, i%nb_joueurs, nb_joueurs, des_joueur, false);
+            }
+            afficherPlateau(plateau, position, nb_joueurs);
+        } else if(attente[i%nb_joueurs] > 0) {
+            printf("Joueur %d se repose à l'hotel. (encore %d tour)\n", i%nb_joueurs+1, attente[i%nb_joueurs]);
+            attente[i%nb_joueurs] -= 1;
         } else {
-            statut = avancer_joueur(plateau, position, attente, i%nb_joueurs, nb_joueurs, des_joueur, false);
+            if (position[nb_joueurs] == 74) {
+                printf("Joueur %d est en prison, il passe son tour.\n", i%nb_joueurs+1);
+            } else {
+                printf("Joueur %d est coincé dans le trou, il passe son tour.\n", i%nb_joueurs+1);
+            }
         }
         i++;
-        afficherPlateau(plateau, position, nb_joueurs);
+        if(statut == -1) {
+            statut = -2;
+            for(int i = 0; i < nb_joueurs; i++) {
+                if(attente[i] != -1) {
+                    statut = -1;
+                }
+            }
+        }
     }
-    return i; //retourne l'index du gagnant
+    if(statut == -2) return -2;
+    return i%nb_joueurs; //retourne l'index du gagnant
 }
 
 
 int main(int argc, char * argv[]) {
     char *plateau = plateau_oie();
+    int res = -1;
     if(argc > 1){
         FILE *save_file = fopen(argv[1], "r");
         if(save_file == NULL) {
@@ -388,20 +389,26 @@ int main(int argc, char * argv[]) {
         if (statut != -1) status_partie = " ";
         printf("Chargement de partie : %d joueurs, %d tours simulés, partie %sterminée\n", nb_joueurs, nb_tours, status_partie);
         afficherPlateau(plateau, positions, nb_joueurs);
-        if(statut == -1) playgame(attente, positions, plateau, nb_joueurs, i);
+        printf("%s\n", plateau);
+        if(statut == -1) res = playgame(attente, positions, plateau, nb_joueurs, i);
     } else {
         //On créer une nouvelle partie à partir de rien
         int nb_tours = 0;
         int nb_joueurs;
         char *status_partie = "non ";
-            printf("Combien de joueur ? ");
-        for(;nb_joueurs < 2 || nb_joueurs > 4;){
+        printf("\033[1;33mCombien de joueur ? ");
+        scanf("%d", &nb_joueurs);printf("\033[0m");
+        while(nb_joueurs < 2 || nb_joueurs > 4){
             scanf("%d", &nb_joueurs);
             printf("Valeur invalide, le total de joueur doit être entre 2 et 4 compris.\nCombien de joueur ? ");
         }
-        int attente[nb_joueurs]; // Vérifie si le joueur peut jouer (On variera avec scanf)
-        int positions[nb_joueurs]; // même chose qu'avec attente
-        playgame(attente, positions, plateau, nb_joueurs, 0);
+        int attente[4]; // Vérifie si le joueur peut jouer (On variera avec scanf)
+        int positions[4]; // même chose qu'avec attente
+        afficherPlateau(plateau, positions, nb_joueurs);
+        res = playgame(attente, positions, plateau, nb_joueurs, 0);
     }
+    if(res > -1)       printf("\033[1;32mPartie finit :\033[0m Le joueur gagnant est le numéro %d. Bravo !\n", res);
+    else if(res == -2) printf("\033[1;31mPartie finit :\033[0m Tout les joueurs sont bloqués.\n");
+    else if(res == -1) printf("\033[1;31mPartie finit :\033[0m Jeu arrêté, partie pas sauvegardé.\n");
     return 0;
 }
